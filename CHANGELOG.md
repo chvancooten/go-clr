@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.0.4 2024-07-09
+
+### Fixed
+
+- Merged [Pull 7](https://github.com/Ne0nd0g/go-clr/pull/7) from @chvancooten to fix issue where GetConsoleWindow misidentifies existing console
+
 ## 1.0.3 2022-11-10
 
 ## Changed
