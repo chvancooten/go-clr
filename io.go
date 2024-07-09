@@ -71,8 +71,8 @@ func RedirectStdoutStderr() (err error) {
 	getConsoleWindow := kernel32.NewProc("GetConsoleWindow")
 
 	// Ensure the process has a console because if it doesn't there will be no output to capture
-	hConsole, _, _ := getConsoleWindow.Call()
-	if hConsole == 0 {
+	_, _, err = getConsoleWindow.Call()
+	if err != syscall.Errno(0) {
 		// https://learn.microsoft.com/en-us/windows/console/allocconsole
 		allocConsole := kernel32.NewProc("AllocConsole")
 		// BOOL WINAPI AllocConsole(void);
@@ -84,7 +84,7 @@ func RedirectStdoutStderr() (err error) {
 		}
 
 		// Get a handle to the newly created/allocated console
-		hConsole, _, _ = getConsoleWindow.Call()
+		hConsole, _, _ := getConsoleWindow.Call()
 
 		user32 := windows.NewLazySystemDLL("user32.dll")
 		showWindow := user32.NewProc("ShowWindow")
