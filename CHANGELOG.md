@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## 1.0.5 2025-12-29
+
+### Added
+
+- Added `VT_I4` constant to `variant.go` for 4-byte signed integers
+- Added `//go:build windows` build constraints to `methodinfo.go` and `variant.go`
+
+### Changed
+
+- Updated `MethodInfo.Invoke_3` to return the `Variant` result of the method invocation
+- Updated `ExecuteByteArray` and `InvokeAssembly` to capture and return the assembly's exit code
+- `InvokeAssembly` now returns `(stdout string, stderr string, exitCode int32)`
+
 ## 1.0.4 2024-07-09
 
 ### Fixed

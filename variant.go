@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package clr
@@ -9,6 +10,8 @@ const (
 	// VT_NULL A propagating null value was specified. (This should not be confused with the null pointer.)
 	// The null value is used for tri-state logic, as with SQL.
 	VT_NULL uint16 = 0x0001
+	// VT_I4 is a Variant Type of Signed Integer of 4-byte
+	VT_I4 uint16 = 0x0003
 	// VT_UI1 is a Variant Type of Unsigned Integer of 1-byte
 	VT_UI1 uint16 = 0x0011
 	// VT_UT4 is a Varriant Type of Unsigned Integer of 4-byte

@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package clr
@@ -105,21 +106,22 @@ func (obj *MethodInfo) Release() uintptr {
 }
 
 // Invoke_3 Invokes the method or constructor reflected by this MethodInfo instance.
-//      virtual HRESULT __stdcall Invoke_3 (
-//      /*[in]*/ VARIANT obj,
-//      /*[in]*/ SAFEARRAY * parameters,
-//      /*[out,retval]*/ VARIANT * pRetVal ) = 0;
+//
+//	virtual HRESULT __stdcall Invoke_3 (
+//	/*[in]*/ VARIANT obj,
+//	/*[in]*/ SAFEARRAY * parameters,
+//	/*[out,retval]*/ VARIANT * pRetVal ) = 0;
+//
 // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.methodbase.invoke?view=net-5.0
-func (obj *MethodInfo) Invoke_3(variantObj Variant, parameters *SafeArray) (err error) {
+func (obj *MethodInfo) Invoke_3(variantObj Variant, parameters *SafeArray) (retVal Variant, err error) {
 	debugPrint("Entering into methodinfo.Invoke_3()...")
-	var pRetVal *Variant
 	hr, _, err := syscall.Syscall6(
 		obj.vtbl.Invoke_3,
 		4,
 		uintptr(unsafe.Pointer(obj)),
 		uintptr(unsafe.Pointer(&variantObj)),
 		uintptr(unsafe.Pointer(parameters)),
-		uintptr(unsafe.Pointer(pRetVal)),
+		uintptr(unsafe.Pointer(&retVal)),
 		0,
 		0,
 	)
@@ -151,14 +153,14 @@ func (obj *MethodInfo) Invoke_3(variantObj Variant, parameters *SafeArray) (err 
 		iErrorInfo, errG := GetErrorInfo()
 		if errG != nil {
 			err = fmt.Errorf("there was an error getting the IErrorInfo object:\r\n%s", errG)
-			return err
+			return retVal, err
 		}
 
 		// Read the IErrorInfo description
 		desc, errD := iErrorInfo.GetDescription()
 		if errD != nil {
 			err = fmt.Errorf("the IErrorInfo::GetDescription method returned an error:\r\n%s", errD)
-			return err
+			return retVal, err
 		}
 		if desc == nil {
 			err = fmt.Errorf("the Assembly::Invoke_3 method returned a non-zero HRESULT: 0x%x", hr)
@@ -171,10 +173,6 @@ func (obj *MethodInfo) Invoke_3(variantObj Variant, parameters *SafeArray) (err 
 		return
 	}
 
-	if pRetVal != nil {
-		err = fmt.Errorf("the Assembly::Invoke_3 method returned a non-zero pRetVal: %+v", pRetVal)
-		return
-	}
 	err = nil
 	return
 }

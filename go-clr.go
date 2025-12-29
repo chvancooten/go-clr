@@ -198,15 +198,20 @@ func ExecuteByteArray(targetRuntime string, rawBytes []byte, params []string) (r
 		VT:  1,
 		Val: uintptr(0),
 	}
-	err = methodInfo.Invoke_3(nullVariant, paramSafeArray)
+	retVal, err := methodInfo.Invoke_3(nullVariant, paramSafeArray)
 	if err != nil {
 		return
 	}
+
+	if retVal.VT == VT_I4 {
+		retCode = int32(retVal.Val)
+	}
+
 	appDomain.Release()
 	runtimeHost.Release()
 	runtimeInfo.Release()
 	metahost.Release()
-	return 0, nil
+	return retCode, nil
 }
 
 // LoadCLR loads the target runtime into the current process and returns the runtimehost
@@ -298,7 +303,7 @@ func ExecuteByteArrayDefaultDomain(runtimeHost *ICORRuntimeHost, rawBytes []byte
 		Val: uintptr(0),
 	}
 
-	err = methodInfo.Invoke_3(nullVariant, paramSafeArray)
+	_, err = methodInfo.Invoke_3(nullVariant, paramSafeArray)
 	if err != nil {
 		stderr = err.Error()
 		return
@@ -332,7 +337,7 @@ func LoadAssembly(runtimeHost *ICORRuntimeHost, rawBytes []byte) (methodInfo *Me
 // InvokeAssembly uses the MethodInfo structure of a previously loaded assembly and executes it.
 // The intended purpose is for the assembly to be executed many times throughout the duration of the
 // program. Commonly used with C2 frameworks
-func InvokeAssembly(methodInfo *MethodInfo, params []string) (stdout string, stderr string) {
+func InvokeAssembly(methodInfo *MethodInfo, params []string) (stdout string, stderr string, exitCode int32) {
 	var paramSafeArray *SafeArray
 	methodSignature, err := methodInfo.GetString()
 	if err != nil {
@@ -358,10 +363,14 @@ func InvokeAssembly(methodInfo *MethodInfo, params []string) (stdout string, std
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	err = methodInfo.Invoke_3(nullVariant, paramSafeArray)
+	retVal, err := methodInfo.Invoke_3(nullVariant, paramSafeArray)
 	if err != nil {
 		stderr = err.Error()
 		// Don't return because there could be data on STDOUT/STDERR
+	}
+
+	if retVal.VT == VT_I4 {
+		exitCode = int32(retVal.Val)
 	}
 
 	// Read data from previously redirected STDOUT/STDERR
